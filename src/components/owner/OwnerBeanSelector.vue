@@ -14,7 +14,7 @@
               <p class="text-sm text-textSecondary">{{ menu?.name }}</p>
             </div>
             <button
-              class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100"
+              class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors"
               @click="$emit('close')"
             >
               <BaseIcon name="close" :size="20" />

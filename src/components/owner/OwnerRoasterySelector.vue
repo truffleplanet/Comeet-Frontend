@@ -13,7 +13,7 @@
               {{ isCreateMode ? '새 로스터리 등록' : '로스터리 선택' }}
             </h3>
             <button
-              class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-neutral-100"
+              class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-neutral-100 transition-colors"
               @click="handleClose"
             >
               <BaseIcon name="close" :size="20" />

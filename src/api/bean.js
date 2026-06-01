@@ -37,7 +37,7 @@ export const createBean = async (beanData) => {
  * @returns {Promise<Object>} 수정된 원두 정보
  */
 export const updateBean = async (beanId, beanData) => {
-  const response = await api.put(`/beans/${beanId}`, beanData)
+  const response = await api.patch(`/beans/${beanId}`, beanData)
   return response.data?.data || response.data
 }
 
