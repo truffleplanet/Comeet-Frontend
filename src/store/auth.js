@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getUserInfo, logout as logoutApi } from '@/api/auth'
+import { getUserInfo, logout as logoutApi, login as loginApi, signup as signupApi } from '@/api/auth'
 import { safeStorage, removeAccessToken } from '@/utils/storage'
 import { createLogger } from '@/utils/logger'
 import { showSuccess } from '@/utils/toast'
@@ -35,8 +35,10 @@ export const useAuthStore = defineStore('auth', {
     userProfileImage: (state) => state.user?.profileImageUrl || null,
     /** 사용자 Role */
     userRole: (state) => state.user?.role || null,
-    /** 점주(MANAGER) 여부 */
-    isOwner: (state) => state.user?.role === 'MANAGER',
+    /** 점주(OWNER) 여부 */
+    isOwner: (state) => state.user?.role === 'OWNER',
+    /** 관리자(ADMIN) 여부 */
+    isAdmin: (state) => state.user?.role === 'ADMIN',
     /** 서비스 등록 완료 여부 */
     isRegistered: (state) => state.user?.role && state.user.role !== 'GUEST',
     /** 닉네임 등록 여부 */
@@ -59,6 +61,48 @@ export const useAuthStore = defineStore('auth', {
       } catch (error) {
         logger.warn('사용자 인증 실패')
         this.clearUser()
+        throw error
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    /**
+     * 이메일/비밀번호 로그인
+     * @param {Object} credentials - 이메일, 비밀번호
+     */
+    async login(credentials) {
+      this.isLoading = true
+      try {
+        await loginApi(credentials)
+        // AccessToken은 axios 응답 인터셉터가 자동으로 localStorage에 저장합니다.
+        const userData = await this.fetchUser()
+        logger.info('로그인 성공', { email: credentials.email })
+        showSuccess('성공적으로 로그인되었습니다.')
+        return userData
+      } catch (error) {
+        logger.error('로그인 실패', error)
+        throw error
+      } finally {
+        this.isLoading = false
+      }
+    },
+
+    /**
+     * 이메일/비밀번호 회원가입
+     * @param {Object} signupData - 회원가입 양식 데이터
+     */
+    async signup(signupData) {
+      this.isLoading = true
+      try {
+        await signupApi(signupData)
+        // AccessToken은 axios 응답 인터셉터가 자동으로 localStorage에 저장합니다.
+        const userData = await this.fetchUser()
+        logger.info('회원가입 성공', { email: signupData.email })
+        showSuccess('성공적으로 가입 및 로그인되었습니다.')
+        return userData
+      } catch (error) {
+        logger.error('회원가입 실패', error)
         throw error
       } finally {
         this.isLoading = false

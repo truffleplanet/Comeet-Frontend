@@ -17,7 +17,7 @@
             <p class="text-textPrimary text-lg font-bold">{{ authStore.userNickname }}</p>
             <p class="text-textSecondary text-sm">{{ authStore.userEmail }}</p>
             <p class="text-xs text-primary mt-1">
-              {{ authStore.isOwner ? '가맹점주' : '일반 사용자' }}
+              {{ roleText }}
             </p>
           </div>
         </div>
@@ -31,6 +31,41 @@
         >
           <span class="text-textPrimary font-medium">내 가게 관리</span>
           <span class="text-textSecondary">›</span>
+        </button>
+      </div>
+
+      
+      <div v-if="authStore.isAdmin" class="bg-white rounded-lg shadow-sm mb-4">
+        <button
+          class="w-full flex items-center justify-between p-4 hover:bg-primary-50 transition-colors"
+          @click="goToAdminApplications"
+        >
+          <span class="text-textPrimary font-medium">점주 신청 관리 (운영자)</span>
+          <span class="text-textSecondary">›</span>
+        </button>
+      </div>
+
+      
+      <div v-if="!authStore.isOwner && !authStore.isAdmin" class="bg-white rounded-lg shadow-sm mb-4">
+        <button
+          class="w-full flex flex-col p-4 hover:bg-primary-50 transition-colors text-left"
+          @click="goToOwnerApply"
+        >
+          <div class="w-full flex items-center justify-between">
+            <span class="text-textPrimary font-medium">가맹점주 신청</span>
+            <div class="flex items-center gap-1.5">
+              <span v-if="latestApplication?.status === 'PENDING'" class="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full font-semibold">심사 중</span>
+              <span v-else-if="latestApplication?.status === 'REJECTED'" class="text-xs bg-red-100 text-red-600 px-2 py-0.5 rounded-full font-semibold">거절됨</span>
+              <span class="text-textSecondary">›</span>
+            </div>
+          </div>
+          <p class="text-xs text-textSecondary mt-1">
+            {{ latestApplication?.status === 'PENDING'
+                ? '제출하신 매장 정보와 사업자 정보를 심사 중입니다.'
+                : latestApplication?.status === 'REJECTED'
+                  ? '서류 심사에서 거절되었습니다. 사유를 확인하고 재신청하세요.'
+                  : '내 카페를 등록하고 커피 메뉴와 원두를 관리해보세요.' }}
+          </p>
         </button>
       </div>
 
@@ -105,9 +140,10 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
+import { getMyLatestApplication } from '@/api/ownerApplication'
 import { createLogger } from '@/utils/logger'
 import BaseIcon from '@/components/common/BaseIcon.vue'
 import BaseButton from '@/components/common/BaseButton.vue'
@@ -119,6 +155,27 @@ const authStore = useAuthStore()
 
 const showLogoutModal = ref(false)
 const isLoggingOut = ref(false)
+const latestApplication = ref(null)
+
+const roleText = computed(() => {
+  if (authStore.isAdmin) return '운영자'
+  if (authStore.isOwner) return '가맹점주'
+  return '일반 사용자'
+})
+
+const fetchApplicationStatus = async () => {
+  if (!authStore.isOwner && !authStore.isAdmin && authStore.isAuthenticated) {
+    try {
+      latestApplication.value = await getMyLatestApplication()
+    } catch (err) {
+      logger.error('최근 가맹점주 신청 조회 실패', err)
+    }
+  }
+}
+
+onMounted(() => {
+  fetchApplicationStatus()
+})
 
 /**
  * 로그아웃 확인 모달 표시
@@ -153,6 +210,20 @@ const goToMyReviews = () => {
  */
 const goToOwnerStores = () => {
   router.push('/owner/stores')
+}
+
+/**
+ * 점주 신청 페이지로 이동
+ */
+const goToOwnerApply = () => {
+  router.push('/owner/apply')
+}
+
+/**
+ * 관리자 점주 신청 목록 페이지로 이동
+ */
+const goToAdminApplications = () => {
+  router.push('/admin/applications')
 }
 
 /**

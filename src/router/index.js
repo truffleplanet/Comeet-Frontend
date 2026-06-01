@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import HomeView from '@/views/main/HomeView.vue';
 import LoginView from '@/views/auth/LoginView.vue';
-import NicknameRegistrationView from '@/views/auth/NicknameRegistrationView.vue';
 import { getAccessToken, removeAccessToken } from '@/utils/storage';
 import { createLogger } from '@/utils/logger';
 
@@ -38,10 +37,11 @@ const routes = [
     component: LoginView
   },
   {
-    path: '/nickname',
-    name: 'nickname',
-    component: NicknameRegistrationView
+    path: '/signup',
+    name: 'signup',
+    component: () => import('@/views/auth/SignupView.vue')
   },
+
   {
     path: '/test-components',
     name: 'test-components',
@@ -158,6 +158,23 @@ const routes = [
     name: 'owner-bean-new',
     component: () => import('@/views/owner/OwnerBeanFormView.vue'),
     meta: { requiresOwner: true }
+  },
+  {
+    path: '/owner/apply',
+    name: 'owner-apply',
+    component: () => import('@/views/owner/OwnerApplicationView.vue')
+  },
+  {
+    path: '/admin/applications',
+    name: 'admin-applications',
+    component: () => import('@/views/admin/AdminApplicationListView.vue'),
+    meta: { requiresAdmin: true }
+  },
+  {
+    path: '/admin/applications/:id',
+    name: 'admin-application-detail',
+    component: () => import('@/views/admin/AdminApplicationDetailView.vue'),
+    meta: { requiresAdmin: true }
   }
 ];
 
@@ -166,7 +183,7 @@ const router = createRouter({
   routes
 });
 
-const PUBLIC_PAGES = new Set(['/login', '/oauth/callback', '/test-components', '/map', '/saved', '/passport']);
+const PUBLIC_PAGES = new Set(['/login', '/signup', '/oauth/callback', '/test-components', '/map', '/saved', '/passport']);
 
 const PUBLIC_PATH_PATTERNS = [
   /^\/store\/\d+$/,
@@ -178,7 +195,7 @@ const PUBLIC_PATH_PATTERNS = [
 /**
  * 토큰으로 사용자 인증 시도
  */
-const tryAuthWithToken = async (authStore, targetPath) => {
+const tryAuthWithToken = async (authStore) => {
   let accessToken = null;
 
   try {
@@ -193,10 +210,6 @@ const tryAuthWithToken = async (authStore, targetPath) => {
 
   try {
     await authStore.fetchUser();
-
-    if (!authStore.user?.nickName && targetPath !== '/nickname') {
-      return { success: true, redirect: '/nickname' };
-    }
     return { success: true };
   } catch {
     try {
@@ -206,14 +219,7 @@ const tryAuthWithToken = async (authStore, targetPath) => {
   }
 };
 
-/**
- * 닉네임 등록이 필요한지 확인
- */
-const needsNicknameRegistration = (authStore, targetPath) => {
-  return authStore.isAuthenticated &&
-    authStore.user?.role === 'GUEST' &&
-    targetPath !== '/nickname';
-};
+
 
 /**
  * 공개 페이지 여부 확인
@@ -226,24 +232,18 @@ const isPublicPage = (path) => {
 /**
  * 비인증 사용자 라우팅 처리
  */
-const handleUnauthenticatedUser = async (authStore, targetPath) => {
-  const result = await tryAuthWithToken(authStore, targetPath);
+const handleUnauthenticatedUser = async (authStore, _targetPath) => {
+  const result = await tryAuthWithToken(authStore);
   return result.redirect ?? null;
 };
 
-/**
- * 인증된 사용자 라우팅 처리
- */
 const handleAuthenticatedUser = (authStore, targetPath) => {
   if (!authStore.isAuthenticated) {
     return null;
   }
 
-  if (targetPath === '/login') {
+  if (targetPath === '/login' || targetPath === '/signup') {
     return '/';
-  }
-  if (needsNicknameRegistration(authStore, targetPath)) {
-    return '/nickname';
   }
   return null;
 };
@@ -289,6 +289,12 @@ router.beforeEach(async (to, from, next) => {
 
   if (to.meta?.requiresOwner && !authStore.isOwner) {
     logger.warn('점주 권한 없음 - 접근 거부', { path: to.path })
+    next('/')
+    return
+  }
+
+  if (to.meta?.requiresAdmin && !authStore.isAdmin) {
+    logger.warn('관리자 권한 없음 - 접근 거부', { path: to.path })
     next('/')
     return
   }

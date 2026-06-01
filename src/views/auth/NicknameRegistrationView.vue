@@ -11,167 +11,43 @@
     </button>
 
     <div class="max-w-[360px] mx-auto pt-16 flex flex-col min-h-[calc(100vh-2rem)]">
-      <Transition name="nickname-collapse" mode="out-in">
-        <div v-if="currentStep === 1" key="step1-input" class="flex-1 flex flex-col">
-          <div class="mb-10">
-            <h1 class="text-2xl font-bold leading-relaxed text-neutral-900">
-              Comeet에서 사용할<br>닉네임을 등록해 주세요
-            </h1>
-          </div>
+      <div class="flex-1 flex flex-col">
+        <div class="mb-10">
+          <h1 class="text-2xl font-bold leading-relaxed text-neutral-900">
+            Comeet에서 사용할<br>닉네임을 등록해 주세요
+          </h1>
+        </div>
 
-          <div class="mb-auto">
-            <BaseInput
-              v-model="nickname"
-              type="text"
-              variant="border"
-              :status="inputStatus"
-              placeholder="닉네임을 입력해 주세요 (12자 이내)"
-              :clearable="true"
-              @update:model-value="validateNickname"
-              @clear="handleClear"
-            />
-            <div class="flex justify-between items-center mt-2 px-1">
-              <span :class="helperTextClass">{{ helperMessage || '\u00A0' }}</span>
-              <span class="text-sm text-textSecondary">{{ nickname.length }}/{{ VALIDATION.NICKNAME.MAX_LENGTH }}</span>
-            </div>
-          </div>
-
-          <div class="pb-8">
-            <BaseButton
-              variant="primary"
-              size="large"
-              :disabled="!isNicknameValid"
-              class="w-full"
-              @click="goToNextStep"
-            >
-              다음
-            </BaseButton>
+        <div class="mb-auto">
+          <BaseInput
+            v-model="nickname"
+            type="text"
+            variant="border"
+            :status="inputStatus"
+            placeholder="닉네임을 입력해 주세요 (12자 이내)"
+            :clearable="true"
+            @update:model-value="validateNickname"
+            @clear="handleClear"
+          />
+          <div class="flex justify-between items-center mt-2 px-1">
+            <span :class="helperTextClass">{{ helperMessage || '\u00A0' }}</span>
+            <span class="text-sm text-textSecondary">{{ nickname.length }}/{{ VALIDATION.NICKNAME.MAX_LENGTH }}</span>
           </div>
         </div>
 
-        <div v-else key="step2-role" class="flex-1 flex flex-col">
-          <div class="mb-6">
-            <h1 class="text-2xl font-bold leading-relaxed text-neutral-900">
-              어떤 서비스를<br>이용하시겠어요?
-            </h1>
-            <p class="mt-2 text-sm text-textSecondary">
-              나중에 설정에서 변경할 수 있어요
-            </p>
-          </div>
-
-          <div class="flex flex-col gap-3">
-            <button
-              type="button"
-              :class="[
-                'w-full p-5 rounded-2xl border-2 text-left transition-all duration-200',
-                selectedRole === 'USER'
-                  ? 'border-primary bg-primary-50 shadow-md'
-                  : 'border-border bg-white hover:border-neutral-400 hover:bg-primary-50'
-              ]"
-              @click="selectedRole = 'USER'"
-            >
-              <span class="flex items-start gap-4">
-                <span
-:class="[
-                  'w-12 h-12 rounded-full flex items-center justify-center text-2xl',
-                  selectedRole === 'USER' ? 'bg-primary-100' : 'bg-surface-light'
-                ]">
-                  🙋
-                </span>
-                <span class="flex-1 flex flex-col text-left">
-                  <span
-:class="[
-                    'text-lg font-bold mb-1',
-                    selectedRole === 'USER' ? 'text-primary-700' : 'text-neutral-900'
-                  ]">
-                    일반 사용자
-                  </span>
-                  <span class="text-sm text-textSecondary">
-                    맛집을 찾고, 저장하고, 리뷰를 남겨요
-                  </span>
-                </span>
-                <span v-if="selectedRole === 'USER'" class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 6L9 17L4 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </span>
-            </button>
-
-            <button
-              type="button"
-              :class="[
-                'w-full p-5 rounded-2xl border-2 text-left transition-all duration-200',
-                selectedRole === 'MANAGER'
-                  ? 'border-primary bg-primary-50 shadow-md'
-                  : 'border-border bg-white hover:border-neutral-400 hover:bg-primary-50'
-              ]"
-              @click="selectedRole = 'MANAGER'"
-            >
-              <span class="flex items-start gap-4">
-                <span
-:class="[
-                  'w-12 h-12 rounded-full flex items-center justify-center text-2xl',
-                  selectedRole === 'MANAGER' ? 'bg-primary-100' : 'bg-surface-light'
-                ]">
-                  🏠
-                </span>
-                <span class="flex-1 flex flex-col text-left">
-                  <span
-:class="[
-                    'text-lg font-bold mb-1',
-                    selectedRole === 'MANAGER' ? 'text-primary-700' : 'text-neutral-900'
-                  ]">
-                    가맹점주
-                  </span>
-                  <span class="text-sm text-textSecondary">
-                    내 가게를 등록하고 관리해요
-                  </span>
-                </span>
-                <span v-if="selectedRole === 'MANAGER'" class="w-6 h-6 rounded-full bg-primary flex items-center justify-center">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M20 6L9 17L4 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                  </svg>
-                </span>
-              </span>
-            </button>
-
-            <div class="flex items-center justify-between p-4 bg-surface-light rounded-xl mt-3">
-              <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
-                  <span class="text-sm">✓</span>
-                </div>
-                <div>
-                  <p class="text-xs text-textSecondary">닉네임</p>
-                  <p class="font-bold text-neutral-900">{{ nickname }}</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                class="text-sm text-primary font-medium hover:underline"
-                @click="goToPrevStep"
-              >
-                수정
-              </button>
-            </div>
-          </div>
-
-          <div class="flex-1"></div>
-
-          <div class="pb-8">
-            <BaseButton
-              variant="primary"
-              size="large"
-              :disabled="!selectedRole || isSubmitting"
-              :loading="isSubmitting"
-              class="w-full"
-              @click="handleSubmit"
-            >
-              시작하기
-            </BaseButton>
-          </div>
+        <div class="pb-8">
+          <BaseButton
+            variant="primary"
+            size="large"
+            :disabled="!isNicknameValid || isSubmitting"
+            :loading="isSubmitting"
+            class="w-full"
+            @click="handleSubmit"
+          >
+            시작하기
+          </BaseButton>
         </div>
-      </Transition>
+      </div>
     </div>
   </div>
 </template>
@@ -191,9 +67,7 @@ const logger = createLogger('NicknameRegistrationView');
 const router = useRouter();
 const authStore = useAuthStore();
 
-const currentStep = ref(1);
 const nickname = ref('');
-const selectedRole = ref('');
 const validationState = ref('idle');
 const helperMessage = ref('');
 const isSubmitting = ref(false);
@@ -213,7 +87,7 @@ const helperTextClass = computed(() => {
   return 'text-sm text-textSecondary';
 });
 
-/** 닉네임 유효성 (다음 단계 진행 가능 여부) */
+/** 닉네임 유효성 (등록 진행 가능 여부) */
 const isNicknameValid = computed(() => {
   return nickname.value.trim().length > 0 && validationState.value === 'success';
 });
@@ -273,45 +147,27 @@ const handleClear = () => {
   clearTimeout(debounceTimer);
 };
 
-/** 다음 단계로 이동 */
-const goToNextStep = () => {
-  if (isNicknameValid.value) {
-    currentStep.value = 2;
-  }
-};
-
-/** 이전 단계로 이동 */
-const goToPrevStep = () => {
-  currentStep.value = 1;
-  selectedRole.value = '';
-};
-
 /** 뒤로 가기 */
 const handleBack = () => {
-  if (currentStep.value === 2) {
-    goToPrevStep();
-  } else {
-    router.back();
-  }
+  router.back();
 };
 
 /** 사용자 등록 완료 */
 const handleSubmit = async () => {
-  if (!isNicknameValid.value || !selectedRole.value || isSubmitting.value) return;
+  if (!isNicknameValid.value || isSubmitting.value) return;
 
   isSubmitting.value = true;
 
   try {
     await registerUser({
       nickname: nickname.value.trim(),
-      role: selectedRole.value
+      role: 'USER'
     });
 
     await authStore.fetchUser();
     showSuccess(`환영합니다, ${nickname.value.trim()}님!`);
     router.push('/preference-onboarding');
   } catch (error) {
-
     const errorCode = error.response?.data?.error?.code;
     const errorMessage = error.response?.data?.error?.message;
 
@@ -323,7 +179,6 @@ const handleSubmit = async () => {
       helperMessage.value = errorMessage || '등록에 실패했습니다. 다시 시도해 주세요.';
     }
 
-    currentStep.value = 1;
     validationState.value = 'error';
   } finally {
     isSubmitting.value = false;
@@ -332,21 +187,4 @@ const handleSubmit = async () => {
 </script>
 
 <style scoped>
-.nickname-collapse-enter-active {
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nickname-collapse-leave-active {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nickname-collapse-enter-from {
-  opacity: 0;
-  transform: translateY(-20px);
-}
-
-.nickname-collapse-leave-to {
-  opacity: 0;
-  transform: translateY(20px);
-}
 </style>

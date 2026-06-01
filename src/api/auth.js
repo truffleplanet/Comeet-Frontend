@@ -28,15 +28,30 @@ export const checkNickname = async (nickname) => {
 };
 
 /**
- * 사용자 서비스 등록 (닉네임 + 역할 설정)
- * POST /user/register
- * @param {Object} userData - 사용자 정보
- * @param {string} userData.nickname - 닉네임 (1~12자, 한글/영문만 허용)
- * @param {string} userData.role - 역할 ('USER' | 'MANAGER')
- * @returns {Promise<Object>} 등록된 사용자 정보
+ * 회원 가입 (이메일, 비밀번호, 이름, 닉네임)
+ * POST /auth/signup
+ * @param {Object} signupData - 회원 가입 정보
+ * @param {string} signupData.name - 이름
+ * @param {string} signupData.email - 이메일
+ * @param {string} signupData.password - 비밀번호 (8자 이상)
+ * @param {string} signupData.nickname - 닉네임 (1~12자)
+ * @returns {Promise<Object>} 가입 완료 토큰 정보
  */
-export const registerUser = async (userData) => {
-  const response = await api.post(API_ENDPOINTS.USER.REGISTER, userData);
+export const signup = async (signupData) => {
+  const response = await api.post('/auth/signup', signupData);
+  return response.data.data;
+};
+
+/**
+ * 로그인 (이메일, 비밀번호)
+ * POST /auth/login
+ * @param {Object} loginData - 로그인 정보
+ * @param {string} loginData.email - 이메일
+ * @param {string} loginData.password - 비밀번호
+ * @returns {Promise<Object>} 로그인 토큰 정보
+ */
+export const login = async (loginData) => {
+  const response = await api.post('/auth/login', loginData);
   return response.data.data;
 };
 
@@ -57,6 +72,19 @@ export const reissueToken = async () => {
 };
 
 /**
+ * 사용자 최종 등록 (소셜 로그인 후 닉네임 설정)
+ * POST /user/register
+ * @param {Object} registerData
+ * @param {string} registerData.nickname - 설정할 닉네임
+ * @param {string} registerData.role - 역할 (USER)
+ * @returns {Promise<Object>} 등록된 사용자 정보
+ */
+export const registerUser = async (registerData) => {
+  const response = await api.post(API_ENDPOINTS.USER.REGISTER, registerData);
+  return response.data.data;
+};
+
+/**
  * 사용자 정보 수정
  * PUT /user
  * @param {Object} userData - 수정할 사용자 정보
@@ -66,16 +94,5 @@ export const reissueToken = async () => {
  */
 export const updateUser = async (userData) => {
   const response = await api.put(API_ENDPOINTS.USER.UPDATE, userData);
-  return response.data.data;
-};
-
-/**
- * 역할(Role) 변경
- * PUT /user/role
- * @param {string} role - 변경할 역할 ('USER' | 'MANAGER')
- * @returns {Promise<Object>} 수정된 사용자 정보
- */
-export const updateUserRole = async (role) => {
-  const response = await api.put(API_ENDPOINTS.USER.ROLE, { role });
   return response.data.data;
 };

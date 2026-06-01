@@ -80,102 +80,6 @@
           <p class="text-xs text-textSecondary mt-1 px-1">소셜 로그인 정보로 수정할 수 없습니다</p>
         </div>
       </div>
-
-      
-      <div class="bg-white rounded-lg p-4 shadow-sm">
-        <label class="block text-sm font-medium text-textPrimary mb-3">역할</label>
-        <div class="flex flex-col gap-3">
-          
-          <button
-            type="button"
-            :class="[
-              'w-full p-4 rounded-xl border-2 text-left transition-all duration-200',
-              selectedRole === 'USER'
-                ? 'border-primary bg-primary-50'
-                : 'border-border bg-white hover:border-neutral-400 hover:bg-primary-50'
-            ]"
-            @click="selectedRole = 'USER'"
-          >
-            <span class="flex items-center gap-3">
-              <span
-                :class="[
-                  'w-10 h-10 rounded-full flex items-center justify-center text-xl',
-                  selectedRole === 'USER' ? 'bg-primary-100' : 'bg-surface-light'
-                ]"
-              >
-                🙋
-              </span>
-              <span class="flex-1 flex flex-col text-left">
-                <span
-                  :class="[
-                    'font-bold',
-                    selectedRole === 'USER' ? 'text-primary-700' : 'text-neutral-900'
-                  ]"
-                >
-                  일반 사용자
-                </span>
-                <span class="text-xs text-textSecondary">
-                  맛집을 찾고, 저장하고, 리뷰를 남겨요
-                </span>
-              </span>
-              
-              <span
-                v-if="selectedRole === 'USER'"
-                class="w-6 h-6 rounded-full bg-primary flex items-center justify-center"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 6L9 17L4 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-            </span>
-          </button>
-
-          
-          <button
-            type="button"
-            :class="[
-              'w-full p-4 rounded-xl border-2 text-left transition-all duration-200',
-              selectedRole === 'MANAGER'
-                ? 'border-primary bg-primary-50'
-                : 'border-border bg-white hover:border-neutral-400 hover:bg-primary-50'
-            ]"
-            @click="selectedRole = 'MANAGER'"
-          >
-            <span class="flex items-center gap-3">
-              <span
-                :class="[
-                  'w-10 h-10 rounded-full flex items-center justify-center text-xl',
-                  selectedRole === 'MANAGER' ? 'bg-primary-100' : 'bg-surface-light'
-                ]"
-              >
-                🏠
-              </span>
-              <span class="flex-1 flex flex-col text-left">
-                <span
-                  :class="[
-                    'font-bold',
-                    selectedRole === 'MANAGER' ? 'text-primary-700' : 'text-neutral-900'
-                  ]"
-                >
-                  가맹점주
-                </span>
-                <span class="text-xs text-textSecondary">
-                  내 가게를 등록하고 관리해요
-                </span>
-              </span>
-              
-              <span
-                v-if="selectedRole === 'MANAGER'"
-                class="w-6 h-6 rounded-full bg-primary flex items-center justify-center"
-              >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M20 6L9 17L4 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-              </span>
-            </span>
-          </button>
-        </div>
-      </div>
     </div>
 
     
@@ -198,7 +102,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/store/auth'
-import { checkNickname, updateUser, updateUserRole } from '@/api/auth'
+import { checkNickname, updateUser } from '@/api/auth'
 import { uploadImage } from '@/api/owner'
 import { DEFAULTS, VALIDATION } from '@/constants'
 import { showSuccess, showError } from '@/utils/toast'
@@ -213,10 +117,8 @@ const authStore = useAuthStore()
 
 const nickname = ref('')
 const profileImageUrl = ref('')
-const selectedRole = ref('')
 const originalNickname = ref('')
 const originalProfileImageUrl = ref('')
-const originalRole = ref('')
 
 const fileInput = ref(null)
 const isUploadingImage = ref(false)
@@ -230,18 +132,15 @@ let debounceTimer = null
 onMounted(() => {
   nickname.value = authStore.userNickname || ''
   profileImageUrl.value = authStore.userProfileImage || ''
-  selectedRole.value = authStore.user?.role || 'USER'
   originalNickname.value = nickname.value
   originalProfileImageUrl.value = profileImageUrl.value
-  originalRole.value = selectedRole.value
   nicknameValidationState.value = 'success'
 })
 
 /** 변경사항 유무 */
 const hasChanges = computed(() => {
   return nickname.value.trim() !== originalNickname.value ||
-    profileImageUrl.value !== originalProfileImageUrl.value ||
-    selectedRole.value !== originalRole.value
+    profileImageUrl.value !== originalProfileImageUrl.value
 })
 
 /** 닉네임 유효성 */
@@ -267,7 +166,6 @@ const nicknameHelperClass = computed(() => {
 
 /** 닉네임 유효성 검사 */
 const validateNickname = async () => {
-
   if (nickname.value.trim() === originalNickname.value) {
     nicknameValidationState.value = 'success'
     nicknameHelperMessage.value = ''
@@ -392,17 +290,7 @@ const handleSave = async () => {
       )
     }
 
-    if (selectedRole.value !== originalRole.value) {
-      promises.push(
-        updateUserRole(selectedRole.value)
-          .then(() => {
-            logger.info('역할 변경 성공')
-          })
-      )
-    }
-
     await Promise.all(promises)
-
     await authStore.fetchUser()
 
     showSuccess('정보가 수정되었습니다')
@@ -419,9 +307,11 @@ const handleSave = async () => {
       nicknameValidationState.value = 'error'
       nicknameHelperMessage.value = '닉네임 형식이 올바르지 않습니다'
     }
-
   } finally {
     isSubmitting.value = false
   }
 }
 </script>
+
+<style scoped>
+</style>
