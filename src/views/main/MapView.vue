@@ -63,8 +63,6 @@ v-if="currentSheetState === 'collapsed'" class="list-view-button" :style="contro
 
     
     <MarkerPopup :store="popupStore" :position="popupPosition" @close="closePopup" @detail="handlePopupDetail" />
-
-    <MapPlaceDetail v-if="detailPlace" :place="detailPlace" @close="detailPlace = null" />
   </div>
 </template>
 
@@ -82,7 +80,6 @@ import { getStoresByLocation, getStoreById } from '@/api/cafe'
 import { calculateDistance, formatDistance } from '@/utils/geo'
 import { createLogger } from '@/utils/logger'
 import MarkerPopup from "@/components/map/MarkerPopup.vue"
-import MapPlaceDetail from "@/components/map/MapPlaceDetail.vue"
 import StoreListSheet from "@/components/map/StoreListSheet.vue"
 import BaseIcon from '@/components/common/BaseIcon.vue'
 
@@ -98,7 +95,6 @@ const isLoading = ref(true)
 const isSearching = ref(false)
 const isLocating = ref(false)
 const showSearchButton = ref(false)
-const detailPlace = ref(null)
 const stores = ref([])
 const userLocation = ref(null)
 const lastSearchCenter = ref(null)
@@ -192,23 +188,13 @@ const fetchStores = async (latitude, longitude, radius = 1000, options = {}) => 
 
     const response = await getStoresByLocation(params)
     if (response.data && response.data.stores) {
-      let storeList = response.data.stores
-
-      const refLat = userLocation.value?.lat || latitude
-      const refLng = userLocation.value?.lng || longitude
-
-      storeList = storeList.map(store => {
-        const storeLat = store.lat || store.latitude
-        const storeLng = store.lng || store.longitude
-        const distance = calculateDistance(refLat, refLng, storeLat, storeLng)
+      const storeList = response.data.stores.map(store => {
+        const distance = Number(store.distance)
         return {
           ...store,
-          distance,
-          distanceText: formatDistance(distance)
+          distanceText: Number.isFinite(distance) ? formatDistance(distance) : undefined
         }
       })
-
-      storeList.sort((a, b) => a.distance - b.distance)
 
       stores.value = storeList
       return storeList
