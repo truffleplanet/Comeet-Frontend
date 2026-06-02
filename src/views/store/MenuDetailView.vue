@@ -137,7 +137,7 @@ const recommendationReason = ref(null)
 const recommendedBeanId = ref(null)
 const recommendedFlavors = ref([])
 
-const menuId = computed(() => Number(route.params.menuId))
+const menuId = computed(() => route.params.menuId)
 
 const menuName = computed(() => menu.value?.menuName || menu.value?.name || '')
 const menuDescription = computed(() => menu.value?.menuDescription || menu.value?.description || '')
@@ -158,7 +158,7 @@ const isFromRecommendation = computed(() => {
 const isRecommendedBean = (bean) => {
   if (!recommendedBeanId.value) return false
   const beanId = bean.beanId || bean.id
-  return Number(beanId) === Number(recommendedBeanId.value)
+  return String(beanId) === String(recommendedBeanId.value)
 }
 
 const recommendedBean = computed(() => {
@@ -180,7 +180,7 @@ const loadMenuDetail = async () => {
       recommendationReason.value = route.query.reason
     }
     if (route.query.recommendedBeanId) {
-      recommendedBeanId.value = Number(route.query.recommendedBeanId)
+      recommendedBeanId.value = route.query.recommendedBeanId
     }
     if (route.query.recommendedFlavors) {
       try {
@@ -190,7 +190,7 @@ const loadMenuDetail = async () => {
 
     const prefilledMenu = {}
     if (route.query.storeId) {
-      prefilledMenu.storeId = Number(route.query.storeId)
+      prefilledMenu.storeId = route.query.storeId
     }
     if (route.query.storeName) {
       prefilledMenu.storeName = route.query.storeName

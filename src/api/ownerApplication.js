@@ -10,7 +10,7 @@ const logger = createLogger('API:OwnerApplication')
  */
 export const applyForOwner = async (applicationData) => {
   const payload = {
-    roasteryId: Number(applicationData.roasteryId),
+    roasteryId: applicationData.roasteryId,
     name: applicationData.name,
     description: applicationData.description || null,
     address: applicationData.address,

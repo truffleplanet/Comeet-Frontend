@@ -20,7 +20,7 @@ export const getMyStores = async () => {
  */
 export const createStore = async (storeData) => {
   const payload = {
-    roasteryId: Number(storeData.roasteryId),
+    roasteryId: storeData.roasteryId,
     name: storeData.name,
     description: storeData.description || null,
     address: storeData.address,
@@ -126,7 +126,7 @@ export const deleteMenu = async (menuId) => {
  */
 export const linkBeanToMenu = async (menuId, beanData) => {
   const payload = {
-    beanId: Number(beanData.beanId),
+    beanId: beanData.beanId,
     isBlended: beanData.isBlended ?? false
   }
   logger.debug('원두 연결', { menuId, payload })
@@ -248,7 +248,7 @@ export const getBeanById = async (beanId) => {
 /**
  * 원두 생성
  * @param {Object} beanData - 원두 정보
- * @param {number} beanData.roasteryId - 로스터리 ID (필수)
+ * @param {number|string} beanData.roasteryId - 로스터리 ID (필수)
  * @param {string} beanData.country - 생산 국가
  * @param {string} beanData.farm - 농장명 (선택)
  * @param {string} beanData.variety - 품종 (선택)
@@ -264,7 +264,7 @@ export const createBean = async (beanData) => {
   )
 
   const payload = {
-    roasteryId: Number(beanData.roasteryId),
+    roasteryId: beanData.roasteryId,
     name,
     country: beanData.country,
     farm: beanData.farm || null,

@@ -385,7 +385,7 @@ const handleImageError = (e) => {
 
 watch(() => props.modelValue, (isOpen) => {
   if (isOpen) {
-    selectedId.value = props.initialRoasteryId ? Number(props.initialRoasteryId) : null
+    selectedId.value = props.initialRoasteryId || null
     searchKeyword.value = ''
     isCreateMode.value = false
     loadRoasteries(true)

@@ -335,7 +335,7 @@ const isFormValid = computed(() => {
   const hasAddress = form.value.address.trim().length > 0
   const hasLatitude = form.value.latitude !== '' && !isNaN(Number(form.value.latitude))
   const hasLongitude = form.value.longitude !== '' && !isNaN(Number(form.value.longitude))
-  const hasRoastery = isEditMode.value || form.value.roasteryId === 'pending' || (form.value.roasteryId !== '' && !isNaN(Number(form.value.roasteryId)))
+  const hasRoastery = isEditMode.value || form.value.roasteryId === 'pending' || form.value.roasteryId !== ''
 
   return hasName && hasAddress && hasLatitude && hasLongitude && hasRoastery
 })
@@ -473,7 +473,7 @@ const handleSubmit = async () => {
         }
       }
 
-      formData.roasteryId = Number(roasteryId)
+      formData.roasteryId = roasteryId
       await createStore(formData)
       showSuccess('가맹점이 등록되었습니다')
     }

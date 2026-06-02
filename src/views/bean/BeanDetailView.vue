@@ -154,7 +154,7 @@ const menuError = ref(null)
 const menuLocationMode = ref('nearby')
 const recommendationReason = ref(null)
 
-const beanId = computed(() => Number(route.params.beanId))
+const beanId = computed(() => route.params.beanId)
 
 const formatMultiValue = (value) => {
   if (!value) return null

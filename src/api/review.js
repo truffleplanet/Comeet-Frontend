@@ -9,9 +9,9 @@ const logger = createLogger('API:Review');
  * @param {Object} reviewData
  * @param {number|string} reviewData.storeId - 가맹점 ID (Required)
  * @param {string} reviewData.content - 리뷰 내용
- * @param {Array<number>} reviewData.flavorIds - 선택한 Flavor ID 목록
- * @param {number} [reviewData.visitId] - 방문 인증 ID (Required by API)
- * @param {number} [reviewData.menuId] - 메뉴 ID (Required by API)
+ * @param {Array<number|string>} reviewData.flavorIds - 선택한 Flavor ID 목록
+ * @param {number|string} [reviewData.visitId] - 방문 인증 ID (Required by API)
+ * @param {number|string} [reviewData.menuId] - 메뉴 ID (Required by API)
  * @param {boolean} [reviewData.isPublic=true] - 공개 여부
  * @param {string} [reviewData.imageUrl] - 이미지 URL
  * @param {number} [reviewData.rating] - 별점 (0-5, 선택)
@@ -20,13 +20,13 @@ const logger = createLogger('API:Review');
  */
 export const createReview = async (reviewData) => {
   const payload = {
-    storeId: Number(reviewData.storeId),
+    storeId: reviewData.storeId,
     content: reviewData.content,
     isPublic: reviewData.isPublic ?? true,
     flavorIdList: reviewData.flavorIds || [],
     imageUrl: reviewData.imageUrl || null,
-    visitId: reviewData.visitId ? Number(reviewData.visitId) : 1,
-    menuId: reviewData.menuId ? Number(reviewData.menuId) : 1,
+    visitId: reviewData.visitId || null,
+    menuId: reviewData.menuId || null,
     rating: reviewData.rating ?? null
   };
 
@@ -162,7 +162,7 @@ export const getReviewDetail = async (reviewId) => {
  * @param {number} reviewId - 리뷰 ID
  * @param {Object} reviewData - 수정할 리뷰 데이터
  * @param {string} [reviewData.content] - 리뷰 내용
- * @param {Array<number>} [reviewData.flavorIds] - 선택한 Flavor ID 목록
+ * @param {Array<number|string>} [reviewData.flavorIds] - 선택한 Flavor ID 목록
  * @param {boolean} [reviewData.isPublic] - 공개 여부
  * @param {string} [reviewData.imageUrl] - 이미지 URL
  * @param {number} [reviewData.rating] - 별점 (0-5)
